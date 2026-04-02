@@ -10,6 +10,7 @@ A real-time healthcare resource coordination platform built using the MERN stack
 - Multi-hospital data coordination
 - Scalable backend architecture
 - Secure API design
+- Authentication system (JWT-based login)
 
 ---
 
@@ -37,10 +38,10 @@ HealthPulse/
 ## ⚙️ Setup Instructions
 
 ```bash
-git clone https://github.com/your-username/HealthPulse.git
+git clone https://github.com/f7aditya/HealthPulse.git
 cd HealthPulse/backend
 npm install
-npm run dev
+npm run start
 ```
 
 ---
@@ -49,6 +50,7 @@ npm run dev
 
 ```
 GET /api/health
+
 ```
 
 ---
@@ -59,6 +61,7 @@ GET /api/health
 - ✅ Clean architecture setup
 - 🚧 Database integration in progress
 - ✅ Hospital registration API implemented
+- ✅ Login API implemented with JWT
 
 ---
 
@@ -68,3 +71,7 @@ GET /api/health
 - Authentication (JWT)
 - WebSocket real-time updates
 - Redis caching
+
+```
+
+```

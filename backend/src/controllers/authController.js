@@ -1,5 +1,6 @@
 import Hospital from "../models/Hospital.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const registerHospital = async (req, res) => {
   // get data
@@ -45,4 +46,45 @@ const registerHospital = async (req, res) => {
   }
 };
 
-export { registerHospital };
+const loginhospital = async (req, res) => {
+  const { email, password } = req.body || {};
+
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "All fields are required.",
+    });
+  }
+
+  try {
+    const hospital = await Hospital.findOne({ email }).select("+password");
+    if (!hospital) {
+      return res.status(400).json({
+        message: "Hospital doesn't exist",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, hospital.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
+    }
+
+    const token = jwt.sign({ id: hospital._id }, process.env.JWT_SECRET, {
+      expiresIn: "24hr",
+    });
+
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Login failed",
+      error: error.message,
+    });
+  }
+};
+
+export { registerHospital, loginhospital };
