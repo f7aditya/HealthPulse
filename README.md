@@ -11,6 +11,7 @@ A real-time healthcare resource coordination platform built using the MERN stack
 - Scalable backend architecture
 - Secure API design
 - Authentication system (JWT-based login)
+- Protected routes using JWT middleware
 
 ---
 
@@ -62,6 +63,7 @@ GET /api/health
 - 🚧 Database integration in progress
 - ✅ Hospital registration API implemented
 - ✅ Login API implemented with JWT
+- ✅ Protected routes implemented (JWT middleware)
 
 ---
 

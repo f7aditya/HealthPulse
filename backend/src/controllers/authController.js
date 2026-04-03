@@ -72,7 +72,7 @@ const loginhospital = async (req, res) => {
     }
 
     const token = jwt.sign({ id: hospital._id }, process.env.JWT_SECRET, {
-      expiresIn: "24hr",
+      expiresIn: "1d",
     });
 
     return res.status(200).json({
