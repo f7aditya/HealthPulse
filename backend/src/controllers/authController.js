@@ -3,88 +3,114 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const registerHospital = async (req, res) => {
-  // get data
   const { name, email, password, location } = req.body || {};
 
-  // validation
   if (!name || !email || !password) {
     return res.status(400).json({
-      message: "All fields are required",
+      message: "Name, email and password are required",
+      success: false,
     });
   }
 
   try {
-    //   check existing or not
-    const existing = await Hospital.findOne({ email });
-    if (existing) {
-      return res.status(400).json({
+    const existingHospital = await Hospital.findOne({ email });
+
+    if (existingHospital) {
+      return res.status(409).json({
         message: "Hospital already exists",
+        success: false,
       });
     }
 
-    const hashedPass = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    //   store in db
-    const hospital = Hospital.create({
+    const hospital = await Hospital.create({
       name,
       email,
-      password: hashedPass,
-      location,
+      password: hashedPassword,
+      location: location || "",
     });
 
     return res.status(201).json({
       message: "Hospital registered successfully",
-      hospital,
       success: true,
+      hospital: {
+        id: hospital._id,
+        name: hospital.name,
+        email: hospital.email,
+        location: hospital.location,
+        createdAt: hospital.createdAt,
+      },
     });
   } catch (error) {
-    return res.status(401).json({
-      message: "Something went wrong",
-      error,
-      success: true,
+    console.error("Register hospital error:", error.message);
+
+    return res.status(500).json({
+      message: "Something went wrong while registering hospital",
+      success: false,
     });
   }
 };
 
-const loginhospital = async (req, res) => {
+const loginHospital = async (req, res) => {
   const { email, password } = req.body || {};
 
   if (!email || !password) {
     return res.status(400).json({
-      message: "All fields are required.",
+      message: "Email and password are required",
+      success: false,
     });
   }
 
   try {
     const hospital = await Hospital.findOne({ email }).select("+password");
+
     if (!hospital) {
-      return res.status(400).json({
-        message: "Hospital doesn't exist",
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, hospital.password);
-
-    if (!isMatch) {
-      return res.status(400).json({
+      return res.status(401).json({
         message: "Invalid email or password",
+        success: false,
       });
     }
 
-    const token = jwt.sign({ id: hospital._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const isPasswordCorrect = await bcrypt.compare(password, hospital.password);
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        message: "Invalid email or password",
+        success: false,
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: hospital._id,
+        role: "hospital",
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      },
+    );
 
     return res.status(200).json({
       message: "Login successful",
+      success: true,
       token,
+      hospital: {
+        id: hospital._id,
+        name: hospital.name,
+        email: hospital.email,
+        location: hospital.location,
+      },
     });
   } catch (error) {
+    console.error("Hospital login error:", error.message);
+
     return res.status(500).json({
       message: "Login failed",
-      error: error.message,
+      success: false,
     });
   }
 };
 
-export { registerHospital, loginhospital };
+export { registerHospital, loginHospital };
