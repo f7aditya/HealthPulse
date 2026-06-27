@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const registerHospital = async (req, res) => {
-  const { name, email, password, location } = req.body || {};
+  const { name, email, city, password, location } = req.body || {};
 
   if (!name || !email || !password) {
     return res.status(400).json({
@@ -29,6 +29,7 @@ const registerHospital = async (req, res) => {
       email,
       password: hashedPassword,
       location: location || "",
+      city: city || "",
     });
 
     return res.status(201).json({
@@ -38,6 +39,7 @@ const registerHospital = async (req, res) => {
         id: hospital._id,
         name: hospital.name,
         email: hospital.email,
+        city: hospital.city,
         location: hospital.location,
         createdAt: hospital.createdAt,
       },
@@ -100,6 +102,7 @@ const loginHospital = async (req, res) => {
         id: hospital._id,
         name: hospital.name,
         email: hospital.email,
+        city: hospital.city,
         location: hospital.location,
       },
     });
