@@ -1,5 +1,6 @@
 import Hospital from "../models/Hospital.js";
 import { BED_TYPES } from "../constants/resourceConstants.js";
+import { BLOOD_GROUPS } from "../constants/resourceConstants.js";
 
 const getResources = async (req, res) => {
   try {
@@ -36,6 +37,16 @@ const updateResources = async (req, res) => {
 
     const hasBeds = beds && Object.keys(beds).length > 0;
 
+    const hasBloodInventory =
+      bloodInventory && Object.keys(bloodInventory).length > 0;
+
+    if (!hasBeds && !hasBloodInventory) {
+      return res.status(400).json({
+        success: false,
+        message: "No resources provided to update",
+      });
+    }
+
     if (hasBeds) {
       const invalidBedTypes = Object.keys(beds).filter(
         (bedType) => !BED_TYPES.includes(bedType),
@@ -49,14 +60,17 @@ const updateResources = async (req, res) => {
       }
     }
 
-    const hasBloodInventory =
-      bloodInventory && Object.keys(bloodInventory).length > 0;
+    if (hasBloodInventory) {
+      const invalidBloodGroups = Object.keys(bloodInventory).filter(
+        (group) => !BLOOD_GROUPS.includes(group),
+      );
 
-    if (!hasBeds && !hasBloodInventory) {
-      return res.status(400).json({
-        success: false,
-        message: "No resources provided to update",
-      });
+      if (invalidBloodGroups.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid blood group(s): ${invalidBloodGroups.join(", ")}`,
+        });
+      }
     }
 
     const hospital = await Hospital.findById(req.user.id);
@@ -105,6 +119,23 @@ const updateResources = async (req, res) => {
     }
 
     // Blood inventory logic will be added later.
+
+    if (hasBloodInventory) {
+      for (const bloodGroup of BLOOD_GROUPS) {
+        const incomingUnits = bloodInventory?.[bloodGroup];
+
+        if (incomingUnits === undefined) continue; //correct choice for partial updates.
+
+        hospital.bloodInventory[bloodGroup] = incomingUnits;
+
+        if (hospital.bloodInventory[bloodGroup] < 0) {
+          return res.status(400).json({
+            success: false,
+            message: `${bloodGroup} blood units cannot be negative`,
+          });
+        }
+      }
+    }
 
     hospital.resourceUpdatedAt = new Date();
 
