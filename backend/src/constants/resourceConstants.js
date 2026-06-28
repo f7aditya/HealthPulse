@@ -9,3 +9,11 @@ export const BLOOD_GROUPS = [
   "O_POSITIVE",
   "O_NEGATIVE",
 ];
+export const RESOURCE_TYPES = ["bed", "blood"];
+
+export const REQUEST_STATUSES = [
+  "pending",
+  "accepted",
+  "completed",
+  "cancelled",
+];
